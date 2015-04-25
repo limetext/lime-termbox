@@ -17,7 +17,7 @@ import (
 	_ "github.com/limetext/lime-backend/lib/commands"
 	"github.com/limetext/lime-backend/lib/keys"
 	"github.com/limetext/lime-backend/lib/log"
-	_ "github.com/limetext/lime-backend/lib/sublime"
+	// _ "github.com/limetext/lime-backend/lib/sublime"
 	"github.com/limetext/lime-backend/lib/textmate"
 	"github.com/limetext/lime-backend/lib/util"
 	"github.com/limetext/termbox-go"
