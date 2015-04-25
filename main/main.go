@@ -785,7 +785,7 @@ func createNewView(filename string, window *backend.Window) *backend.View {
 	v := window.OpenFile(filename, 0)
 
 	v.Settings().Set("trace", true)
-	v.SetSyntaxFile("../../packages/go.tmbundle/Syntaxes/Go.tmLanguage")
+	v.SetSyntaxFile(path.Join(backend.LIME_PACKAGES_PATH, "go.tmbundle", "Syntaxes", "Go.tmLanguage"))
 
 	return v
 }
