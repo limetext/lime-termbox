@@ -486,7 +486,7 @@ func (t *tbfe) renderthread() {
 	dorender := func() {
 		defer func() {
 			if r := recover(); r != nil {
-				log.Errorf("Panic in renderthread: %v\n%s", r, string(debug.Stack()))
+				log.Error("Panic in renderthread: %v\n%s", r, string(debug.Stack()))
 				if pc > 1 {
 					panic(r)
 				}
@@ -708,7 +708,7 @@ func setColorMode() {
 	)
 
 	if err := termbox.SetColorMode(termbox.ColorMode256); err != nil {
-		log.Errorf("Unable to use 256 color mode: %s", err)
+		log.Error("Unable to use 256 color mode: %s", err)
 	} else {
 		log.Debug("Using 256 color mode")
 		mode256 = true
@@ -800,7 +800,8 @@ func main() {
 	}()
 
 	if err := termbox.Init(); err != nil {
-		log.Close(err)
+		log.Error(err)
+		log.Close()
 		return
 	}
 
