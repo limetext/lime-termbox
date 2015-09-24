@@ -1,0 +1,16 @@
+package: github.com/limetext/lime-termbox
+import:
+  - package: github.com/limetext/lime-backend
+    ref:     2c5030159bc2d5743904274e45c3cd0563dcc184
+  - flatten: true
+    package: github.com/limetext/gopy
+    ref:     953f768831d5f6389aacdc9c016ff2fb8c2ca579
+  - package: github.com/limetext/rubex
+    ref:     3fc130e580797e3d9c6fdab36e6a961141f9fd5f
+  - package: github.com/limetext/termbox-go
+    ref:     4eff9880a72757f9e5997d13741b70ea879d66a8
+  - flatten: true
+    package: github.com/limetext/text
+    ref:     d6b8f8c60fe38232a5b59388bbba0f3802c182e9
+  - package: golang.org/x/net
+    ref:     03affa02f16950ea3188823456766ed60bfed9bb

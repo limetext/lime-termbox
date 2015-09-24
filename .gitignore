@@ -5,4 +5,5 @@
 
 *.log
 
+vendor/
 main/main
