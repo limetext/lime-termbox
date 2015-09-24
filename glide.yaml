@@ -5,6 +5,8 @@ import:
   - flatten: true
     package: github.com/limetext/gopy
     ref:     953f768831d5f6389aacdc9c016ff2fb8c2ca579
+  - package: github.com/limetext/log4go
+    ref:     2aba105a605a9ebe476f35d7610704e4e723d4ab
   - package: github.com/limetext/rubex
     ref:     3fc130e580797e3d9c6fdab36e6a961141f9fd5f
   - package: github.com/limetext/termbox-go
