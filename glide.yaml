@@ -10,7 +10,7 @@ import:
   - package: github.com/limetext/rubex
     ref:     3fc130e580797e3d9c6fdab36e6a961141f9fd5f
   - package: github.com/limetext/termbox-go
-    ref:     4eff9880a72757f9e5997d13741b70ea879d66a8
+    ref:     f0f811d98f3690cf3c12e2345330730009478c75
   - flatten: true
     package: github.com/limetext/text
     ref:     d6b8f8c60fe38232a5b59388bbba0f3802c182e9
