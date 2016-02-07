@@ -575,7 +575,7 @@ func (t *tbfe) loop() {
 	timechan := make(chan bool, 0)
 
 	// Only set up the timers if we should actually blink the cursor
-	// This should somehow be changable on an OnSettingsChanged callback
+	// This should somehow be changeable on an OnSettingsChanged callback
 	if p, _ := t.editor.Settings().Get("caret_blink", true).(bool); p {
 		duration := time.Second / 2
 		if p, ok := t.editor.Settings().Get("caret_blink_phase", 1.0).(float64); ok {
