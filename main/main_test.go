@@ -5,11 +5,12 @@
 package main
 
 import (
+	"testing"
+	"time"
+
 	"github.com/limetext/lime-backend/lib"
 	"github.com/limetext/termbox-go"
 	. "github.com/limetext/text"
-	"testing"
-	"time"
 )
 
 func TestPadLineRunes(t *testing.T) {
@@ -154,18 +155,18 @@ func TestLoopShutdown(t *testing.T) {
 func TestHandleInput(t *testing.T) {
 	frontend := createFrontend()
 
-	event_a := termbox.Event{
+	eventA := termbox.Event{
 		Type: termbox.EventKey,
 		Ch:   'a',
 	}
-	event_b := termbox.Event{
+	eventB := termbox.Event{
 		Type: termbox.EventKey,
 		Ch:   'b',
 	}
 	expected := "ab"
 
-	frontend.handleInput(event_a)
-	frontend.handleInput(event_b)
+	frontend.handleInput(eventA)
+	frontend.handleInput(eventB)
 
 	// Allow the event to be handled in the call chain
 	time.Sleep(10 * time.Millisecond)
