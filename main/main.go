@@ -21,7 +21,7 @@ import (
 	"github.com/limetext/lime-backend/lib/textmate"
 	"github.com/limetext/lime-backend/lib/util"
 	"github.com/limetext/termbox-go"
-	. "github.com/limetext/text"
+	"github.com/limetext/text"
 )
 
 var (
@@ -105,7 +105,7 @@ var (
 )
 
 const (
-	render_chan_len = 2
+	renderChanLen   = 2
 	statusbarHeight = 1
 )
 
@@ -113,21 +113,21 @@ type (
 	layout struct {
 		x, y          int
 		width, height int
-		visible       Region
+		visible       text.Region
 		lastUpdate    int
 	}
 
 	tbfe struct {
-		layout         map[*backend.View]layout
-		window_layout  layout
-		status_message string
-		dorender       chan bool
-		shutdown       chan bool
-		lock           sync.Mutex
-		editor         *backend.Editor
-		console        *backend.View
-		currentView    *backend.View
-		currentWindow  *backend.Window
+		layout        map[*backend.View]layout
+		windowLayout  layout
+		statusMessage string
+		dorender      chan bool
+		shutdown      chan bool
+		lock          sync.Mutex
+		editor        *backend.Editor
+		console       *backend.View
+		currentView   *backend.View
+		currentWindow *backend.Window
 	}
 
 	tbfeBufferDeltaObserver struct {
@@ -139,7 +139,7 @@ type (
 // Creates and initializes the frontend.
 func createFrontend() *tbfe {
 	var t tbfe
-	t.dorender = make(chan bool, render_chan_len)
+	t.dorender = make(chan bool, renderChanLen)
 	t.shutdown = make(chan bool, 2)
 	t.layout = make(map[*backend.View]layout)
 
@@ -184,7 +184,7 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 	x, y := sx, sy
 	ex, ey := sx+w, sy+h
 
-	style, _ := v.Settings().Get("caret_style", "underline").(string)
+	style, _ := v.Settings().Get("caretStyle", "underline").(string)
 	inverse, _ := v.Settings().Get("inverse_caret_state", false).(bool)
 
 	caretStyle := getCaretStyle(style, inverse)
@@ -229,7 +229,7 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 			curr++
 		}
 
-		iscursor := sel.Contains(Region{o, o})
+		iscursor := sel.Contains(text.Region{A: o, B: o})
 		if iscursor {
 			fg = fg | caretStyle
 			termbox.SetCell(x, y, ' ', fg, bg)
@@ -265,7 +265,7 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 	fg, bg = defaultFg, defaultBg
 	// Need this if the cursor is at the end of the buffer
 	o := vr.Begin() + len(runes)
-	iscursor := sel.Contains(Region{o, o})
+	iscursor := sel.Contains(text.Region{A: o, B: o})
 	if iscursor {
 		fg = fg | caretStyle
 		termbox.SetCell(x, y, ' ', fg, bg)
@@ -280,16 +280,16 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 		}
 	}
 
-	fg, bg = defaultFg, palLut(textmate.Color{28, 29, 26, 1})
-	y = t.window_layout.height - statusbarHeight
+	fg, bg = defaultFg, palLut(textmate.Color{R: 28, G: 29, B: 26, A: 1})
+	y = t.windowLayout.height - statusbarHeight
 	// Draw status bar bottom of window
-	for i := 0; i < t.window_layout.width; i++ {
+	for i := 0; i < t.windowLayout.width; i++ {
 		termbox.SetCell(i, y, ' ', fg, bg)
 	}
 	t.renderLStatus(v, y, fg, bg)
 	// The right status
 	rns := []rune(fmt.Sprintf("Tab Size:%d   %s", tabSize, "Go"))
-	x = t.window_layout.width - 1 - len(rns)
+	x = t.windowLayout.width - 1 - len(rns)
 	addRunes(x, y, rns, fg, bg)
 }
 
@@ -324,8 +324,8 @@ func (t *tbfe) renderLStatus(v *backend.View, y int, fg, bg termbox.Attribute) {
 		}
 	}
 
-	if t.status_message != "" {
-		s := fmt.Sprintf("; %s", t.status_message)
+	if t.statusMessage != "" {
+		s := fmt.Sprintf("; %s", t.statusMessage)
 		addString(j, y, s, fg, bg)
 	}
 }
@@ -343,7 +343,7 @@ func addRunes(x, y int, runes []rune, fg, bg termbox.Attribute) {
 	}
 }
 
-func (t *tbfe) clip(v *backend.View, s, e int) Region {
+func (t *tbfe) clip(v *backend.View, s, e int) text.Region {
 	p := util.Prof.Enter("clip")
 	defer p.Exit()
 	t.lock.Lock()
@@ -361,11 +361,11 @@ func (t *tbfe) clip(v *backend.View, s, e int) Region {
 		s = 0
 	}
 	e = s + h
-	r := Region{v.Buffer().TextPoint(s, 0), v.Buffer().TextPoint(e, 0)}
+	r := text.Region{A: v.Buffer().TextPoint(s, 0), B: v.Buffer().TextPoint(e, 0)}
 	return v.Buffer().LineR(r)
 }
 
-func (t *tbfe) Show(v *backend.View, r Region) {
+func (t *tbfe) Show(v *backend.View, r text.Region) {
 	t.lock.Lock()
 	l := t.layout[v]
 	t.lock.Unlock()
@@ -379,12 +379,12 @@ func (t *tbfe) Show(v *backend.View, r Region) {
 	s2, _ := v.Buffer().RowCol(r.Begin())
 	e2, _ := v.Buffer().RowCol(r.End())
 
-	r1 := Region{s1, e1}
-	r2 := Region{s2, e2}
+	r1 := text.Region{A: s1, B: e1}
+	r2 := text.Region{A: s2, B: e2}
 
 	r3 := r1.Cover(r2)
 	diff := 0
-	if d1, d2 := Abs(r1.Begin()-r3.Begin()), Abs(r1.End()-r3.End()); d1 > d2 {
+	if d1, d2 := text.Abs(r1.Begin()-r3.Begin()), text.Abs(r1.End()-r3.End()); d1 > d2 {
 		diff = r3.Begin() - r1.Begin()
 	} else {
 		diff = r3.End() - r1.End()
@@ -400,7 +400,7 @@ func (t *tbfe) Show(v *backend.View, r Region) {
 	t.render()
 }
 
-func (t *tbfe) VisibleRegion(v *backend.View) Region {
+func (t *tbfe) VisibleRegion(v *backend.View) text.Region {
 	t.lock.Lock()
 	r, ok := t.layout[v]
 	t.lock.Unlock()
@@ -416,7 +416,7 @@ func (t *tbfe) VisibleRegion(v *backend.View) Region {
 func (t *tbfe) StatusMessage(msg string) {
 	t.lock.Lock()
 	defer t.lock.Unlock()
-	t.status_message = msg
+	t.statusMessage = msg
 }
 
 func (t *tbfe) ErrorMessage(msg string) {
@@ -434,16 +434,16 @@ func (t *tbfe) OkCancelDialog(msg, ok string) bool {
 	return false
 }
 
-func (t *tbfe) scroll(b Buffer) {
-	t.Show(backend.GetEditor().Console(), Region{b.Size(), b.Size()})
+func (t *tbfe) scroll(b text.Buffer) {
+	t.Show(backend.GetEditor().Console(), text.Region{A: b.Size(), B: b.Size()})
 }
 
-func (t *tbfe) Erased(changed_buffer Buffer, region_removed Region, data_removed []rune) {
-	t.scroll(changed_buffer)
+func (t *tbfe) Erased(changedBuffer text.Buffer, regionRemoved text.Region, dataRemoved []rune) {
+	t.scroll(changedBuffer)
 }
 
-func (t *tbfe) Inserted(changed_buffer Buffer, region_inserted Region, data_inserted []rune) {
-	t.scroll(changed_buffer)
+func (t *tbfe) Inserted(changedBuffer text.Buffer, regionInserted text.Region, dataInserted []rune) {
+	t.scroll(changedBuffer)
 }
 
 func (t *tbfe) setupCallbacks(view *backend.View) {
@@ -521,30 +521,30 @@ func (t *tbfe) handleResize(height, width int, init bool) {
 	// After all, it is possible to *not* have a view in a window.
 	t.lock.Lock()
 	if init {
-		t.layout[t.currentView] = layout{0, 0, 0, 0, Region{}, 0}
-		t.window_layout = layout{0, 0, 0, 0, Region{}, 0}
-		t.layout[t.console] = layout{0, 0, 0, 0, Region{}, 0}
+		t.layout[t.currentView] = layout{0, 0, 0, 0, text.Region{}, 0}
+		t.windowLayout = layout{0, 0, 0, 0, text.Region{}, 0}
+		t.layout[t.console] = layout{0, 0, 0, 0, text.Region{}, 0}
 	}
 
-	t.window_layout.height = height
-	t.window_layout.width = width
+	t.windowLayout.height = height
+	t.windowLayout.width = width
 
-	view_layout := t.layout[t.currentView]
-	view_layout.height = height - statusbarHeight
-	view_layout.width = width
-	t.layout[t.currentView] = view_layout
+	viewLayout := t.layout[t.currentView]
+	viewLayout.height = height - statusbarHeight
+	viewLayout.width = width
+	t.layout[t.currentView] = viewLayout
 	if *showConsole {
-		view_layout := t.layout[t.currentView]
-		view_layout.height = height - *consoleHeight - statusbarHeight - 1
-		view_layout.width = width
+		viewLayout := t.layout[t.currentView]
+		viewLayout.height = height - *consoleHeight - statusbarHeight - 1
+		viewLayout.width = width
 
-		console_layout := t.layout[t.console]
-		console_layout.y = height - *consoleHeight - statusbarHeight
-		console_layout.width = width
-		console_layout.height = *consoleHeight
+		consoleLayout := t.layout[t.console]
+		consoleLayout.y = height - *consoleHeight - statusbarHeight
+		consoleLayout.width = width
+		consoleLayout.height = *consoleHeight
 
-		t.layout[t.console] = console_layout
-		t.layout[t.currentView] = view_layout
+		t.layout[t.console] = consoleLayout
+		t.layout[t.currentView] = viewLayout
 	}
 	t.lock.Unlock()
 
@@ -632,19 +632,19 @@ func (t *tbfe) loop() {
 	}
 }
 
-func (bdo *tbfeBufferDeltaObserver) Erased(changed_buffer Buffer, region_removed Region, data_removed []rune) {
-	ensureVisibleRegionContainsInsertOrEraseDelta(bdo.t, bdo.view, region_removed.A-region_removed.B)
+func (bdo *tbfeBufferDeltaObserver) Erased(changedBuffer text.Buffer, regionRemoved text.Region, dataRemoved []rune) {
+	ensureVisibleRegionContainsInsertOrEraseDelta(bdo.t, bdo.view, regionRemoved.A-regionRemoved.B)
 }
 
-func (bdo *tbfeBufferDeltaObserver) Inserted(changed_buffer Buffer, region_inserted Region, data_inserted []rune) {
-	ensureVisibleRegionContainsInsertOrEraseDelta(bdo.t, bdo.view, region_inserted.B-region_inserted.A)
+func (bdo *tbfeBufferDeltaObserver) Inserted(changedBuffer text.Buffer, regionInserted text.Region, dataInserted []rune) {
+	ensureVisibleRegionContainsInsertOrEraseDelta(bdo.t, bdo.view, regionInserted.B-regionInserted.A)
 }
 
 func ensureVisibleRegionContainsInsertOrEraseDelta(t *tbfe, view *backend.View, delta int) {
 	t.lock.Lock()
 	visible := t.layout[view].visible
 	t.lock.Unlock()
-	t.Show(view, Region{visible.Begin(), visible.End() + delta})
+	t.Show(view, text.Region{A: visible.Begin(), B: visible.End() + delta})
 }
 
 func intToRunes(n int) (runes []rune) {
@@ -684,21 +684,21 @@ func renderLineNumber(line, x *int, y, lineNumberRenderSize int, fg, bg termbox.
 }
 
 func getCaretStyle(style string, inverse bool) termbox.Attribute {
-	caret_style := termbox.AttrUnderline
+	caretStyle := termbox.AttrUnderline
 
 	if style == "block" {
-		caret_style = termbox.AttrReverse
+		caretStyle = termbox.AttrReverse
 	}
 
 	if inverse {
-		if caret_style == termbox.AttrReverse {
-			caret_style = termbox.AttrUnderline
+		if caretStyle == termbox.AttrReverse {
+			caretStyle = termbox.AttrUnderline
 		} else {
-			caret_style = termbox.AttrReverse
+			caretStyle = termbox.AttrReverse
 		}
 	}
 
-	return caret_style
+	return caretStyle
 }
 
 func setColorMode() {
@@ -706,9 +706,8 @@ func setColorMode() {
 		mode256 bool
 		pal     = make([]termbox.RGB, 0, 256)
 	)
-
 	if err := termbox.SetColorMode(termbox.ColorMode256); err != nil {
-		log.Error("Unable to use 256 color mode: %s", err)
+		log.Error("Unable to use 256 color mode: %v", err)
 	} else {
 		log.Debug("Using 256 color mode")
 		mode256 = true
