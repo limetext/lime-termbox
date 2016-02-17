@@ -793,9 +793,6 @@ func main() {
 	flag.Parse()
 
 	log.AddFilter("file", log.FINEST, log.NewFileLogWriter("debug.log", *rotateLog))
-	// Replace Global Logger filter so that it does not interfere with the ui
-	log.AddFilter("stdout", log.DEBUG, log.NewFileLogWriter("debug.log", *rotateLog))
-
 	defer func() {
 		py.NewLock()
 		py.Finalize()
@@ -817,7 +814,7 @@ func main() {
 	}()
 
 	t := createFrontend()
-	t.editor.Init()
 	go t.renderthread()
+	go t.editor.Init()
 	t.loop()
 }
