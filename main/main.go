@@ -286,7 +286,7 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 	for i := 0; i < t.window_layout.width; i++ {
 		termbox.SetCell(i, y, ' ', fg, bg)
 	}
-	t.renderLStatus(v, y, fg, bg)
+	go t.renderLStatus(v, y, fg, bg)
 	// The right status
 	rns := []rune(fmt.Sprintf("Tab Size:%d   %s", tabSize, "Go"))
 	x = t.window_layout.width - 1 - len(rns)
