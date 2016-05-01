@@ -1,5 +1,5 @@
-hash: 19e952203559e4f00db53f5103783878ecc2d3e2edec11509afd0cbabb39f734
-updated: 2016-05-01T22:42:07.185465747+01:00
+hash: 0d2bd82515680e132d5f100b2285f751462d54a5b2643c05ed4c30c84ab0af70
+updated: 2016-05-01T23:27:47.223230918+01:00
 imports:
 - name: github.com/atotto/clipboard
   version: bb272b845f1112e10117e3e45ce39f690c0001ad
@@ -44,10 +44,6 @@ imports:
   version: d6bea18f789704b5f83375793155289da36a3c7f
 - name: github.com/quarnster/parser
   version: 8991807ce6d383a41077a642b7b381eba1df7064
-- name: golang.org/x/sys
-  version: b776ec39b3e54652e09028aaaaac9757f4f8211a
-  subpackages:
-  - unix
 - name: gopkg.in/fsnotify.v1
   version: 836bfd95fecc0f1511dd66bdbf2b5b61ab8b00b6
 devImports: []

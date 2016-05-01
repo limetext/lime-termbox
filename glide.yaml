@@ -13,3 +13,5 @@ import:
 - package: github.com/limetext/termbox-go
 - package: github.com/limetext/text
 - package: github.com/limetext/util
+- package: gopkg.in/fsnotify.v1
+  version: 836bfd95fecc0f1511dd66bdbf2b5b61ab8b00b6
