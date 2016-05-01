@@ -30,11 +30,10 @@ addons:
       - python3.5-dev
 
 install:
-  - make travis glide tasks
+  - make travis
 
 script:
   - make travis_test
-  - make check_fmt check_license
 
 notifications:
   webhooks:

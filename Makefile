@@ -38,11 +38,12 @@ glide:
 	go get -v -u github.com/Masterminds/glide
 	glide install
 
-travis: tasks
+travis:
 ifeq ($(TRAVIS_OS_NAME),osx)
 	brew update
 	brew install oniguruma python3
 endif
+travis: glide tasks
 
 travis_test: export PKG_CONFIG_PATH += $(PWD)/vendor/github.com/limetext/rubex:$(GOPATH)/src/github.com/limetext/rubex
 travis_test: test test_run check_fmt check_license
