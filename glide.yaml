@@ -13,5 +13,3 @@ import:
 - package: github.com/limetext/termbox-go
 - package: github.com/limetext/text
 - package: github.com/limetext/util
-excludeDirs:
-- packages

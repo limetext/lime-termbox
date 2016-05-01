@@ -1,5 +1,5 @@
-hash: 6a4a621bb796dd7a50983f4a6d3d1ce1d44cf51ca573d62b2ff03864edc1e57a
-updated: 2016-05-01T14:07:04.237785425+01:00
+hash: 19e952203559e4f00db53f5103783878ecc2d3e2edec11509afd0cbabb39f734
+updated: 2016-05-01T22:42:07.185465747+01:00
 imports:
 - name: github.com/atotto/clipboard
   version: bb272b845f1112e10117e3e45ce39f690c0001ad
@@ -26,7 +26,7 @@ imports:
 - name: github.com/limetext/log4go
   version: 41f52bba2191d3bfa764c6867968eb06acbd8f3c
 - name: github.com/limetext/rubex
-  version: 3fc130e580797e3d9c6fdab36e6a961141f9fd5f
+  version: 06adcbb38bcc95987997894b1de33e7502bc1933
 - name: github.com/limetext/sublime
   version: d185d6ac6ea0a81425539cfd8529128bffd9ea11
   subpackages:
@@ -49,5 +49,5 @@ imports:
   subpackages:
   - unix
 - name: gopkg.in/fsnotify.v1
-  version: 30411dbcefb7a1da7e84f75530ad3abe4011b4f8
+  version: 836bfd95fecc0f1511dd66bdbf2b5b61ab8b00b6
 devImports: []
