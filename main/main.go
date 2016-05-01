@@ -6,6 +6,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"path"
 	"runtime/debug"
 	"strconv"
 	"sync"
@@ -89,8 +90,7 @@ var (
 		termbox.KeyF12:        {Key: keys.F12},
 		termbox.KeyTab:        {Key: '\t'},
 	}
-	palLut func(col render.Colour) termbox.Attribute
-	// scheme    *sublime.Theme
+	palLut    func(col render.Colour) termbox.Attribute
 	defaultBg = termbox.ColorBlack
 	defaultFg = termbox.ColorWhite
 	blink     bool
@@ -160,15 +160,10 @@ func createFrontend() *tbfe {
 	t.console.AddObserver(&t)
 	t.setupCallbacks(t.currentView)
 
-	// path := path.Join(backend.LIME_PACKAGES_PATH, "themes", "TextMate-Themes", "Monokai.tmTheme")
-	// if sc, err := textmate.LoadTheme(path); err != nil {
-	// 	log.Error(err)
-	// } else {
-	// 	scheme = sc
-	// }
+	t.editor.Settings().Set("color_scheme", path.Join("..", "packages", "themes", "TextMate-Themes", "Monokai.tmTheme"))
 
 	setColorMode()
-	// setSchemeSettings()
+	setSchemeSettings()
 
 	return &t
 }
@@ -201,7 +196,7 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 
 	lineNumbers, _ := v.Settings().Get("line_numbers", true).(bool)
 
-	// recipe := v.Transform(scheme, vr).Transcribe()
+	recipe := v.Transform(vr).Transcribe()
 
 	fg, bg := defaultFg, defaultBg
 	sel := v.Sel()
@@ -217,16 +212,16 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 			renderLineNumber(&line, &x, y, lineNumberRenderSize, fg, bg)
 		}
 
-		// curr := 0
+		curr := 0
 		o := vr.Begin() + i
 
-		// for curr < len(recipe) && (o >= recipe[curr].Region.Begin()) {
-		// 	if o < recipe[curr].Region.End() {
-		// 		fg = palLut(render.Colour(recipe[curr].Flavour.Foreground))
-		// 		bg = palLut(render.Colour(recipe[curr].Flavour.Background))
-		// 	}
-		// 	curr++
-		// }
+		for curr < len(recipe) && (o >= recipe[curr].Region.Begin()) {
+			if o < recipe[curr].Region.End() {
+				fg = palLut(render.Colour(recipe[curr].Flavour.Foreground))
+				bg = palLut(render.Colour(recipe[curr].Flavour.Background))
+			}
+			curr++
+		}
 
 		iscursor := sel.Contains(Region{o, o})
 		if iscursor {
@@ -759,32 +754,33 @@ func setColorMode() {
 	}
 }
 
-// func setSchemeSettings() {
-// 	for i, s := range scheme.Settings {
-// 		var (
-// 			fi = defaultFg
-// 			bi = defaultBg
-// 		)
-// 		if fg, ok := s.Settings["foreground"]; ok {
-// 			fi = palLut(fg)
-// 			if i == 0 {
-// 				defaultFg = fi
-// 			}
-// 		}
-// 		if bg, ok := s.Settings["background"]; ok {
-// 			bi = palLut(bg)
-// 			if i == 0 {
-// 				defaultBg = bi
-// 			}
-// 		}
-// 	}
-// }
+// FIXME: Update this to work with the new way of handling colour schemes.
+func setSchemeSettings() {
+	// for i, s := range scheme.Settings {
+	// 	var (
+	// 		fi = defaultFg
+	// 		bi = defaultBg
+	// 	)
+	// 	if fg, ok := s.Settings["foreground"]; ok {
+	// 		fi = palLut(fg)
+	// 		if i == 0 {
+	// 			defaultFg = fi
+	// 		}
+	// 	}
+	// 	if bg, ok := s.Settings["background"]; ok {
+	// 		bi = palLut(bg)
+	// 		if i == 0 {
+	// 			defaultBg = bi
+	// 		}
+	// 	}
+	// }
+}
 
 func createNewView(filename string, window *backend.Window) *backend.View {
 	v := window.OpenFile(filename, 0)
 
 	v.Settings().Set("trace", true)
-	// v.SetSyntaxFile(path.Join(backend.LIME_PACKAGES_PATH, "go.tmbundle", "Syntaxes", "Go.tmLanguage"))
+	v.SetSyntaxFile(path.Join("..", "packages", "go-tmbundle", "Syntaxes", "Go.tmLanguage"))
 
 	return v
 }
