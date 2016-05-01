@@ -6,22 +6,21 @@ package main
 import (
 	"flag"
 	"fmt"
-	"path"
 	"runtime/debug"
 	"strconv"
 	"sync"
 	"time"
 
+	"github.com/limetext/backend"
+	"github.com/limetext/backend/keys"
+	"github.com/limetext/backend/log"
+	"github.com/limetext/backend/render"
+	_ "github.com/limetext/commands"
 	"github.com/limetext/gopy/lib"
-	"github.com/limetext/lime-backend/lib"
-	_ "github.com/limetext/lime-backend/lib/commands"
-	"github.com/limetext/lime-backend/lib/keys"
-	"github.com/limetext/lime-backend/lib/log"
-	_ "github.com/limetext/lime-backend/lib/sublime"
-	"github.com/limetext/lime-backend/lib/textmate"
-	"github.com/limetext/lime-backend/lib/util"
+	_ "github.com/limetext/sublime"
 	"github.com/limetext/termbox-go"
 	. "github.com/limetext/text"
+	"github.com/limetext/util"
 )
 
 var (
@@ -90,8 +89,8 @@ var (
 		termbox.KeyF12:        {Key: keys.F12},
 		termbox.KeyTab:        {Key: '\t'},
 	}
-	palLut    func(col textmate.Color) termbox.Attribute
-	scheme    *textmate.Theme
+	palLut func(col render.Colour) termbox.Attribute
+	// scheme    *sublime.Theme
 	defaultBg = termbox.ColorBlack
 	defaultFg = termbox.ColorWhite
 	blink     bool
@@ -158,18 +157,18 @@ func createFrontend() *tbfe {
 	w, h := termbox.Size()
 	t.handleResize(h, w, true)
 
-	t.console.Buffer().AddObserver(&t)
+	t.console.AddObserver(&t)
 	t.setupCallbacks(t.currentView)
 
-	path := path.Join(backend.LIME_PACKAGES_PATH, "themes", "TextMate-Themes", "Monokai.tmTheme")
-	if sc, err := textmate.LoadTheme(path); err != nil {
-		log.Error(err)
-	} else {
-		scheme = sc
-	}
+	// path := path.Join(backend.LIME_PACKAGES_PATH, "themes", "TextMate-Themes", "Monokai.tmTheme")
+	// if sc, err := textmate.LoadTheme(path); err != nil {
+	// 	log.Error(err)
+	// } else {
+	// 	scheme = sc
+	// }
 
 	setColorMode()
-	setSchemeSettings()
+	// setSchemeSettings()
 
 	return &t
 }
@@ -180,7 +179,7 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 
 	sx, sy, w, h := lay.x, lay.y, lay.width, lay.height
 	vr := lay.visible
-	runes := v.Buffer().Substr(vr)
+	runes := v.Substr(vr)
 	x, y := sx, sy
 	ex, ey := sx+w, sy+h
 
@@ -202,32 +201,32 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 
 	lineNumbers, _ := v.Settings().Get("line_numbers", true).(bool)
 
-	recipie := v.Transform(scheme, vr).Transcribe()
+	// recipe := v.Transform(scheme, vr).Transcribe()
 
 	fg, bg := defaultFg, defaultBg
 	sel := v.Sel()
 
-	line, _ := v.Buffer().RowCol(vr.Begin())
-	eofline, _ := v.Buffer().RowCol(v.Buffer().Size())
+	line, _ := v.RowCol(vr.Begin())
+	eofline, _ := v.RowCol(v.Size())
 	lineNumberRenderSize := len(intToRunes(eofline))
 
 	for i, r := range runes {
-		o := vr.Begin() + i
-		curr := 0
 		fg, bg = defaultFg, defaultBg
 
 		if lineNumbers {
 			renderLineNumber(&line, &x, y, lineNumberRenderSize, fg, bg)
 		}
 
-		// TODO: doc
-		for curr < len(recipie) && (o >= recipie[curr].Region.Begin()) {
-			if o < recipie[curr].Region.End() {
-				fg = palLut(textmate.Color(recipie[curr].Flavour.Foreground))
-				bg = palLut(textmate.Color(recipie[curr].Flavour.Background))
-			}
-			curr++
-		}
+		// curr := 0
+		o := vr.Begin() + i
+
+		// for curr < len(recipe) && (o >= recipe[curr].Region.Begin()) {
+		// 	if o < recipe[curr].Region.End() {
+		// 		fg = palLut(render.Colour(recipe[curr].Flavour.Foreground))
+		// 		bg = palLut(render.Colour(recipe[curr].Flavour.Background))
+		// 	}
+		// 	curr++
+		// }
 
 		iscursor := sel.Contains(Region{o, o})
 		if iscursor {
@@ -280,7 +279,7 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 		}
 	}
 
-	fg, bg = defaultFg, palLut(textmate.Color{28, 29, 26, 1})
+	fg, bg = defaultFg, palLut(render.Colour{28, 29, 26, 1})
 	y = t.window_layout.height - statusbarHeight
 	// Draw status bar bottom of window
 	for i := 0; i < t.window_layout.width; i++ {
@@ -309,12 +308,12 @@ func (t *tbfe) renderLStatus(v *backend.View, y int, fg, bg termbox.Attribute) {
 		s := fmt.Sprintf("%d selection regions", l)
 		j = addString(j, y, s, fg, bg)
 	} else if r := sel.Get(0); r.Size() == 0 {
-		row, col := v.Buffer().RowCol(r.A)
+		row, col := v.RowCol(r.A)
 		s := fmt.Sprintf("Line %d, Column %d", row, col)
 		j = addString(j, y, s, fg, bg)
 	} else {
-		ls := v.Buffer().Lines(r)
-		s := v.Buffer().Substr(r)
+		ls := v.Lines(r)
+		s := v.Substr(r)
 		if len(ls) < 2 {
 			s := fmt.Sprintf("%d characters selected", len(s))
 			j = addString(j, y, s, fg, bg)
@@ -354,15 +353,15 @@ func (t *tbfe) clip(v *backend.View, s, e int) Region {
 	} else if e-s < h {
 		s = e - h
 	}
-	if e2, _ := v.Buffer().RowCol(v.Buffer().TextPoint(e, 0)); e2 < e {
+	if e2, _ := v.RowCol(v.TextPoint(e, 0)); e2 < e {
 		e = e2
 	}
 	if s < 0 {
 		s = 0
 	}
 	e = s + h
-	r := Region{v.Buffer().TextPoint(s, 0), v.Buffer().TextPoint(e, 0)}
-	return v.Buffer().LineR(r)
+	r := Region{v.TextPoint(s, 0), v.TextPoint(e, 0)}
+	return v.LineR(r)
 }
 
 func (t *tbfe) Show(v *backend.View, r Region) {
@@ -374,10 +373,10 @@ func (t *tbfe) Show(v *backend.View, r Region) {
 
 	lv := l.visible
 
-	s1, _ := v.Buffer().RowCol(lv.Begin())
-	e1, _ := v.Buffer().RowCol(lv.End())
-	s2, _ := v.Buffer().RowCol(r.Begin())
-	e2, _ := v.Buffer().RowCol(r.End())
+	s1, _ := v.RowCol(lv.Begin())
+	e1, _ := v.RowCol(lv.End())
+	s2, _ := v.RowCol(r.Begin())
+	e2, _ := v.RowCol(r.End())
 
 	r1 := Region{s1, e1}
 	r2 := Region{s2, e2}
@@ -404,7 +403,7 @@ func (t *tbfe) VisibleRegion(v *backend.View) Region {
 	t.lock.Lock()
 	r, ok := t.layout[v]
 	t.lock.Unlock()
-	if !ok || r.lastUpdate != v.Buffer().ChangeCount() {
+	if !ok || r.lastUpdate != v.ChangeCount() {
 		t.Show(v, r.visible)
 		t.lock.Lock()
 		r = t.layout[v]
@@ -449,7 +448,7 @@ func (t *tbfe) Inserted(changed_buffer Buffer, region_inserted Region, data_inse
 func (t *tbfe) setupCallbacks(view *backend.View) {
 	// Ensure that the visible region currently presented is
 	// inclusive of the insert/erase delta.
-	view.Buffer().AddObserver(&tbfeBufferDeltaObserver{t: t, view: view})
+	view.AddObserver(&tbfeBufferDeltaObserver{t: t, view: view})
 
 	backend.OnNew.Add(func(v *backend.View) {
 		v.Settings().AddOnChange("lime.frontend.termbox.render", func(name string) { t.render() })
@@ -732,7 +731,7 @@ func setColorMode() {
 			}
 			return v
 		}
-		palLut = func(col textmate.Color) termbox.Attribute {
+		palLut = func(col render.Colour) termbox.Attribute {
 			mindist := 10000000
 			mini := 0
 			for i, c := range pal {
@@ -744,7 +743,7 @@ func setColorMode() {
 			return termbox.Attribute(mini)
 		}
 	} else {
-		palLut = func(col textmate.Color) termbox.Attribute {
+		palLut = func(col render.Colour) termbox.Attribute {
 			tc := termbox.RGB{R: col.R, G: col.G, B: col.B}
 			for i, c := range pal {
 				if c == tc {
@@ -760,32 +759,32 @@ func setColorMode() {
 	}
 }
 
-func setSchemeSettings() {
-	for i, s := range scheme.Settings {
-		var (
-			fi = defaultFg
-			bi = defaultBg
-		)
-		if fg, ok := s.Settings["foreground"]; ok {
-			fi = palLut(fg)
-			if i == 0 {
-				defaultFg = fi
-			}
-		}
-		if bg, ok := s.Settings["background"]; ok {
-			bi = palLut(bg)
-			if i == 0 {
-				defaultBg = bi
-			}
-		}
-	}
-}
+// func setSchemeSettings() {
+// 	for i, s := range scheme.Settings {
+// 		var (
+// 			fi = defaultFg
+// 			bi = defaultBg
+// 		)
+// 		if fg, ok := s.Settings["foreground"]; ok {
+// 			fi = palLut(fg)
+// 			if i == 0 {
+// 				defaultFg = fi
+// 			}
+// 		}
+// 		if bg, ok := s.Settings["background"]; ok {
+// 			bi = palLut(bg)
+// 			if i == 0 {
+// 				defaultBg = bi
+// 			}
+// 		}
+// 	}
+// }
 
 func createNewView(filename string, window *backend.Window) *backend.View {
 	v := window.OpenFile(filename, 0)
 
 	v.Settings().Set("trace", true)
-	v.SetSyntaxFile(path.Join(backend.LIME_PACKAGES_PATH, "go.tmbundle", "Syntaxes", "Go.tmLanguage"))
+	// v.SetSyntaxFile(path.Join(backend.LIME_PACKAGES_PATH, "go.tmbundle", "Syntaxes", "Go.tmLanguage"))
 
 	return v
 }
