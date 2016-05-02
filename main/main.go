@@ -6,7 +6,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"path"
 	"runtime/debug"
 	"strconv"
 	"sync"
