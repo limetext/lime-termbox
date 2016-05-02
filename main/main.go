@@ -160,8 +160,6 @@ func createFrontend() *tbfe {
 	t.console.AddObserver(&t)
 	t.setupCallbacks(t.currentView)
 
-	t.editor.Settings().Set("color_scheme", path.Join("..", "packages", "themes", "TextMate-Themes", "Monokai.tmTheme"))
-
 	setColorMode()
 	setSchemeSettings()
 
@@ -780,7 +778,6 @@ func createNewView(filename string, window *backend.Window) *backend.View {
 	v := window.OpenFile(filename, 0)
 
 	v.Settings().Set("trace", true)
-	v.SetSyntaxFile(path.Join("..", "packages", "go-tmbundle", "Syntaxes", "Go.tmLanguage"))
 
 	return v
 }
