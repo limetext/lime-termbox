@@ -5,7 +5,7 @@
 package main
 
 import (
-	"github.com/limetext/lime-backend/lib"
+	"github.com/limetext/backend"
 	"github.com/limetext/termbox-go"
 	. "github.com/limetext/text"
 	"testing"
@@ -170,8 +170,8 @@ func TestHandleInput(t *testing.T) {
 	// Allow the event to be handled in the call chain
 	time.Sleep(10 * time.Millisecond)
 
-	buffer := frontend.currentView.Buffer()
-	if substring := buffer.Substr(Region{A: 0, B: buffer.Size()}); substring != expected {
-		t.Errorf("Expected %q to be in editor's buffer, but got %q.", expected, substring)
+	view := frontend.currentView
+	if substring := view.Substr(Region{A: 0, B: view.Size()}); substring != expected {
+		t.Errorf("Expected %q to be in editor's view, but got %q.", expected, substring)
 	}
 }
