@@ -160,7 +160,7 @@ func createFrontend() *tbfe {
 	t.setupCallbacks(t.currentView)
 
 	setColorMode()
-	setSchemeSettings()
+	setSchemeSettings(t.editor)
 
 	return &t
 }
@@ -751,26 +751,16 @@ func setColorMode() {
 	}
 }
 
-// FIXME: Update this to work with the new way of handling colour schemes.
-func setSchemeSettings() {
-	// for i, s := range scheme.Settings {
-	// 	var (
-	// 		fi = defaultFg
-	// 		bi = defaultBg
-	// 	)
-	// 	if fg, ok := s.Settings["foreground"]; ok {
-	// 		fi = palLut(fg)
-	// 		if i == 0 {
-	// 			defaultFg = fi
-	// 		}
-	// 	}
-	// 	if bg, ok := s.Settings["background"]; ok {
-	// 		bi = palLut(bg)
-	// 		if i == 0 {
-	// 			defaultBg = bi
-	// 		}
-	// 	}
-	// }
+func setSchemeSettings(ed *backend.Editor) {
+	s := ed.GetColorScheme(ed.Settings().Get("color_scheme", "").(string))
+
+	if s == nil {
+		log.Error("No colour scheme to set defaults from")
+		return
+	}
+
+	defaultFg = palLut(s.Global().Foreground)
+	defaultBg = palLut(s.Global().Background)
 }
 
 func createNewView(filename string, window *backend.Window) *backend.View {
