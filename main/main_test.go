@@ -5,11 +5,12 @@
 package main
 
 import (
+	"testing"
+	"time"
+
 	"github.com/limetext/backend"
 	"github.com/limetext/termbox-go"
 	. "github.com/limetext/text"
-	"testing"
-	"time"
 )
 
 func TestPadLineRunes(t *testing.T) {
