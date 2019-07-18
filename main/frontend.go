@@ -123,6 +123,7 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 	sel := v.Sel()
 
 	line, _ := v.RowCol(vr.Begin())
+	line += 1
 	eofline, _ := v.RowCol(v.Size())
 	lineNumberRenderSize := len(intToRunes(eofline))
 
@@ -138,8 +139,8 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 
 		for curr < len(recipe) && (o >= recipe[curr].Region.Begin()) {
 			if o < recipe[curr].Region.End() {
-				fg = palLut(render.Colour(recipe[curr].Flavour.Foreground))
-				bg = palLut(render.Colour(recipe[curr].Flavour.Background))
+				fg = color256(render.Colour(recipe[curr].Flavour.Foreground))
+				bg = color256(render.Colour(recipe[curr].Flavour.Background))
 			}
 			curr++
 		}
@@ -147,7 +148,6 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 		iscursor := sel.Contains(Region{o, o})
 		if iscursor {
 			fg = fg | caretStyle
-			termbox.SetCell(x, y, ' ', fg, bg)
 		}
 
 		if r == '\t' {
@@ -195,7 +195,7 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 		}
 	}
 
-	fg, bg = defaultFg, palLut(render.Colour{28, 29, 26, 1})
+	fg, bg = defaultFg, color256(render.Colour{28, 29, 26, 1})
 	y = t.window_layout.height - statusbarHeight
 	// Draw status bar bottom of window
 	for i := 0; i < t.window_layout.width; i++ {

@@ -12,8 +12,8 @@ func setSchemeSettings(ed *backend.Editor) {
 		return
 	}
 
-	defaultFg = palLut(s.GlobalSettings().Foreground)
-	defaultBg = palLut(s.GlobalSettings().Background)
+	defaultFg = color256(s.GlobalSettings().Foreground)
+	defaultBg = color256(s.GlobalSettings().Background)
 }
 
 func createNewView(filename string, window *backend.Window) *backend.View {
