@@ -10,7 +10,7 @@ import:
   subpackages:
   - lib
 - package: github.com/limetext/sublime
-- package: github.com/limetext/termbox-go
+- package: github.com/nsf/termbox-go
 - package: github.com/limetext/text
 - package: github.com/limetext/util
 - package: gopkg.in/fsnotify.v1

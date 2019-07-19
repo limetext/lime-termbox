@@ -11,9 +11,9 @@ import (
 	"github.com/limetext/backend/keys"
 	"github.com/limetext/backend/log"
 	"github.com/limetext/backend/render"
-	"github.com/limetext/termbox-go"
 	. "github.com/limetext/text"
 	"github.com/limetext/util"
+	"github.com/nsf/termbox-go"
 )
 
 type (

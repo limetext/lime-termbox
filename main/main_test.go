@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/limetext/backend"
-	"github.com/limetext/termbox-go"
 	. "github.com/limetext/text"
+	"github.com/nsf/termbox-go"
 )
 
 func TestPadLineRunes(t *testing.T) {

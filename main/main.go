@@ -10,8 +10,8 @@ import (
 	_ "github.com/limetext/commands"
 	py "github.com/limetext/gopy"
 	_ "github.com/limetext/sublime"
-	"github.com/limetext/termbox-go"
 	"github.com/limetext/util"
+	"github.com/nsf/termbox-go"
 )
 
 // Command line flags

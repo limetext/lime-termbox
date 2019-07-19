@@ -5,8 +5,8 @@ import (
 
 	"github.com/limetext/backend/keys"
 	"github.com/limetext/backend/render"
-	"github.com/limetext/termbox-go"
 	"github.com/lucasb-eyer/go-colorful"
+	"github.com/nsf/termbox-go"
 )
 
 var (

@@ -34,7 +34,7 @@ imports:
   - internal/textmate/language
   - internal/textmate/theme
   - internal
-- name: github.com/limetext/termbox-go
+- name: github.com/nsf/termbox-go
   version: 3bd8fce76a53b144a99fe92f6ab56894eb02c469
 - name: github.com/limetext/text
   version: 06ae8177eb526ccd7877df1d16909b4e48b75e0f

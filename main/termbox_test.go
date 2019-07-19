@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/limetext/backend/render"
-	"github.com/limetext/termbox-go"
+	"github.com/nsf/termbox-go"
 )
 
 func TestColourToTermbox(t *testing.T) {
