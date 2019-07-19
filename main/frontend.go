@@ -225,7 +225,7 @@ func (t *tbfe) renderLStatus(v *backend.View, y int, fg, bg termbox.Attribute) {
 		j = addString(j, y, s, fg, bg)
 	} else if r := sel.Get(0); r.Size() == 0 {
 		row, col := v.RowCol(r.A)
-		s := fmt.Sprintf("Line %d, Column %d", row, col)
+		s := fmt.Sprintf("Line %d, Column %d", row+1, col)
 		j = addString(j, y, s, fg, bg)
 	} else {
 		ls := v.Lines(r)
