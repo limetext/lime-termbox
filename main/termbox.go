@@ -376,7 +376,7 @@ func color256(col render.Colour) termbox.Attribute {
 		nd := c1.DistanceLab(c2)
 		if nd < dist {
 			dist = nd
-			found = i
+			found = i + 1
 		}
 	}
 
