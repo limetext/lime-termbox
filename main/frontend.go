@@ -101,10 +101,8 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 
 	style, _ := v.Settings().Get("caret_style", "underline").(string)
 	inverse, _ := v.Settings().Get("inverse_caret_state", false).(bool)
-
 	caretStyle := getCaretStyle(style, inverse)
 	oldCaretStyle := caretStyle
-
 	caretBlink, _ := v.Settings().Get("caret_blink", true).(bool)
 	if caretBlink && blink {
 		caretStyle = 0
@@ -115,17 +113,16 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 		tabSize = i
 	}
 
-	lineNumbers, _ := v.Settings().Get("line_numbers", true).(bool)
-
 	recipe := v.Transform(vr).Transcribe()
-
 	fg, bg := defaultFg, defaultBg
+
 	sel := v.Sel()
 
-	line, _ := v.RowCol(vr.Begin())
-	line += 1
+	lineNumbers, _ := v.Settings().Get("line_numbers", true).(bool)
 	eofline, _ := v.RowCol(v.Size())
 	lineNumberRenderSize := len(intToRunes(eofline))
+	line, _ := v.RowCol(vr.Begin())
+	line += 1
 
 	for i, r := range runes {
 		fg, bg = defaultFg, defaultBg
@@ -160,21 +157,23 @@ func (t *tbfe) renderView(v *backend.View, lay layout) {
 				fg = fg & ^(termbox.AttrUnderline | termbox.AttrReverse)
 			}
 			continue
-		} else if r == '\n' {
+		}
+		if r == '\n' {
+			termbox.SetCell(x, y, ' ', fg, bg)
 			x = sx
-			if y++; y > ey {
-				break
-			} else if lineNumbers {
+			y++
+			if lineNumbers {
 				// This results in additional calls to renderLineNumber.
 				// Maybe just accumulate positions needing line numbers, rendering them
 				// after the loop?
 				renderLineNumber(&line, &x, y, lineNumberRenderSize, defaultFg, defaultBg)
 			}
+			if y > ey {
+				break
+			}
 			continue
 		}
-		if x < ex {
-			termbox.SetCell(x, y, r, fg, bg)
-		}
+		termbox.SetCell(x, y, r, fg, bg)
 		x++
 	}
 	fg, bg = defaultFg, defaultBg

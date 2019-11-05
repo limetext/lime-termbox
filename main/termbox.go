@@ -419,7 +419,6 @@ func renderLineNumber(line, x *int, y, lineNumberRenderSize int, fg, bg termbox.
 
 		*line++
 	}
-
 }
 
 func getCaretStyle(style string, inverse bool) termbox.Attribute {
