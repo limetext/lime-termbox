@@ -12,4 +12,4 @@
 
 # lime-termbox
 
-This is the termbox frontend for [Lime](http://limetext.org/). For more information about the project, please see [limetext/lime](https://github.com/limetext/lime).
+This is the termbox frontend for Lime. For more information about the project, please see [limetext/lime](https://github.com/limetext/lime).
